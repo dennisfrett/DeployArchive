@@ -1,13 +1,32 @@
 #!/bin/bash
+
+error () {
+  printf "\e[0;31m[✖] $1 \e[0m\n"
+}
+
+info () {
+  printf "\e[0;32m[✔] $1 \e[0m\n"
+}
+
+iferrorelse () {
+  rc=$?
+  if [[ $rc != 0 ]]; then
+    error "$1"
+    exit
+  else
+    info "$2"
+  fi
+}
+
 PROJECT_FILENAME="project.pbxproj"
 XCODEPROJ_FILE=$(find . -maxdepth 1 -type d -name '*.xcodeproj' | head -n1)/$PROJECT_FILENAME
 
-echo "Location of XCode project file: $XCODEPROJ_FILE"
+info "Found XCode project file: $XCODEPROJ_FILE"
 
 # Check if the project file is in XML format
 if grep -q -m 1 "<?xml" $XCODEPROJ_FILE; then
   # File is in XML
-  echo "Please save project file as JSON"
+  error "Please save project file as JSON"
   exit
 else
   # File is not in XML
@@ -17,17 +36,20 @@ else
   BUNDLE_ID=${BUNDLE_ID_TMP%?}
 fi
 
-echo "Found bundle id: $BUNDLE_ID"
+info "Found bundle id: $BUNDLE_ID"
 
 ARCHIVE_PATH="$HOME/Library/Developer/Xcode/Archives/"
 LATEST_DATE_PATH=$ARCHIVE_PATH$(ls -1t $ARCHIVE_PATH | head -1)
 LATEST_ARCHIVE_PATH=$LATEST_DATE_PATH/$(ls -1t $LATEST_DATE_PATH | head -1)
 
-echo "Archive path: $LATEST_ARCHIVE_PATH"
+info "Found archive: $LATEST_ARCHIVE_PATH"
 
 IPA_PATH="$HOME/Desktop/bundle"
 # Remove ipa
 rm $IPA_PATH.ipa
 
 xcodebuild -exportArchive -archivePath "$LATEST_ARCHIVE_PATH" -exportPath $IPA_PATH -exportFormat ipa -exportProvisioningProfile "iOS Team Provisioning Profile: $BUNDLE_ID" 1> /dev/null
-ios-deploy --bundle $IPA_PATH.ipa  1> /dev/null
+iferrorelse "Could not create IPA" "Created IPA: $IPA_PATH.ipa"
+
+ios-deploy --bundle $IPA_PATH.ipa 1> /dev/null
+iferrorelse "Could not deploy IPA" "Deployed IPA"
