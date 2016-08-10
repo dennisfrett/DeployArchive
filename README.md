@@ -16,4 +16,6 @@ This script will automatically detect the most recent XCode archive build on you
 ## Limitations
 This script only works if you execute it in the project directory of the project that corresponds to the most recent archive build.
 If you run it in a different project directory, you will get the following error message:
-`2016-08-10 16:42:26.991 ios-deploy[97736:2386984] [ !! ] Error 0xe8008016: The entitlements specified in your application’s Code Signing Entitlements file do not match those specified in your provisioning profile. AMDeviceSecureInstallApplication(0, device, url, options, install_callback, 0)`
+```
+2016-08-10 16:42:26.991 ios-deploy[97736:2386984] [ !! ] Error 0xe8008016: The entitlements specified in your application’s Code Signing Entitlements file do not match those specified in your provisioning profile. AMDeviceSecureInstallApplication(0, device, url, options, install_callback, 0)
+```
