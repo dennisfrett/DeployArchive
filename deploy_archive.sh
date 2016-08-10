@@ -44,12 +44,14 @@ LATEST_ARCHIVE_PATH=$LATEST_DATE_PATH/$(ls -1t $LATEST_DATE_PATH | head -1)
 
 info "Found archive: $LATEST_ARCHIVE_PATH"
 
-IPA_PATH="$HOME/Desktop/bundle"
-# Remove ipa
-rm $IPA_PATH.ipa
+TEMP_DIR=$(mktemp -d)
+
+info "Created temporary directory: $TEMP_DIR"
+
+IPA_PATH=$TEMP_DIR/bundle.ipa
 
 xcodebuild -exportArchive -archivePath "$LATEST_ARCHIVE_PATH" -exportPath $IPA_PATH -exportFormat ipa -exportProvisioningProfile "iOS Team Provisioning Profile: $BUNDLE_ID" 1> /dev/null
-iferrorelse "Could not create IPA" "Created IPA: $IPA_PATH.ipa"
+iferrorelse "Could not create IPA" "Created IPA: $IPA_PATH"
 
-ios-deploy --bundle $IPA_PATH.ipa 1> /dev/null
+ios-deploy --bundle $IPA_PATH 1> /dev/null
 iferrorelse "Could not deploy IPA" "Deployed IPA"
