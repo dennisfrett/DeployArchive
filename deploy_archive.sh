@@ -41,19 +41,12 @@ info "Found bundle id: $BUNDLE_ID"
 ARCHIVE_PATH="$HOME/Library/Developer/Xcode/Archives/"
 LATEST_DATE_PATH=$ARCHIVE_PATH$(ls -1t $ARCHIVE_PATH | head -1)
 LATEST_ARCHIVE_PATH=$LATEST_DATE_PATH/$(ls -1t $LATEST_DATE_PATH | head -1)
+APP_PATH=$(cd "$LATEST_ARCHIVE_PATH/Products/Applications/" && cd * && pwd)
 
-info "Found archive: $LATEST_ARCHIVE_PATH"
-
-TEMP_DIR=$(mktemp -d)
-IPA_PATH=$TEMP_DIR/bundle.ipa
-
-info "Created temporary directory: $TEMP_DIR"
-
-xcodebuild -exportArchive -archivePath "$LATEST_ARCHIVE_PATH" -exportPath $IPA_PATH -exportFormat ipa -exportProvisioningProfile "iOS Team Provisioning Profile: $BUNDLE_ID" 1> /dev/null
-iferrorelse "Could not create IPA" "Created IPA: $IPA_PATH"
+info "Found archive: $APP_PATH"
 
 ios-deploy --uninstall_only --bundle_id $BUNDLE_ID 1> /dev/null
 iferrorelse "Could not uninstall app $BUNDLE_ID from device" "Uninstalled app $BUNDLE_ID from device"
 
-ios-deploy --bundle $IPA_PATH 1> /dev/null
-iferrorelse "Could not deploy IPA to device" "Deployed IPA to device"
+ios-deploy --bundle "$APP_PATH" 1> /dev/null
+iferrorelse "Could not deploy app $BUNDLE_ID to device" "Deployed app $BUNDLE_ID to device"
